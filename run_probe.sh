@@ -14,19 +14,14 @@ echo "Job ID: ${SLURM_JOB_ID}"
 echo "Node: $(hostname)"
 echo "Working dir: $(pwd)"
 echo "Time: $(date -Iseconds)"
+echo "TMPDIR=${TMPDIR}"
 echo "================================"
 
-# Mimic what Nextflow scratch=true does:
-# 1. Set TMPDIR to /data/scratch/<jobid>
-# 2. Create a subdirectory under it (like nxf_mktemp does)
-# 3. cd into that subdirectory
-SCRATCH_BASE="/data/scratch/${SLURM_JOB_ID}"
-mkdir -p "${SCRATCH_BASE}"
-export TMPDIR="${SCRATCH_BASE}"
+# SLURM already sets TMPDIR=/data/scratch/<jobid> and creates it.
+# Just create a subdirectory inside it (like nxf_mktemp does) and cd into it.
 NXF_SCRATCH="$(mktemp -d -t nxf.XXXXXXXXXX)"
 cd "${NXF_SCRATCH}"
 
-echo "SCRATCH_BASE=${SCRATCH_BASE}"
 echo "NXF_SCRATCH=${NXF_SCRATCH}"
 echo "PWD after cd=$(pwd)"
 

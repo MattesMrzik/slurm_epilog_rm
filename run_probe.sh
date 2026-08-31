@@ -18,11 +18,8 @@ echo "TMPDIR=${TMPDIR}"
 echo "================================"
 
 # SLURM already sets TMPDIR=/data/scratch/<jobid> and creates it.
-# Just create a subdirectory inside it (like nxf_mktemp does) and cd into it.
-NXF_SCRATCH="$(mktemp -d -t nxf.XXXXXXXXXX)"
-cd "${NXF_SCRATCH}"
+cd "${TMPDIR}"
 
-echo "NXF_SCRATCH=${NXF_SCRATCH}"
 echo "PWD after cd=$(pwd)"
 
 python3 "${SCRIPT_DIR}/epiltrap_standalone.py"

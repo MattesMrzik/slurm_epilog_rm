@@ -5,7 +5,7 @@
 
 NODE="${1:-13}"
 COUNT="${2:-30}"
-PROJ_DIR="/cfs/earth/scratch/mrzi/develop/tkf_eval/cleanup_tests/standalone_epilog_test"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Submitting ${COUNT} standalone epilog probes to node0${NODE}..."
 echo "Spacing: 1s between submissions (matching Nextflow behavior)"
 
@@ -13,8 +13,8 @@ for i in $(seq 1 "${COUNT}"); do
     echo "  [${i}/${COUNT}] submitting..."
     sbatch --partition=earth-3 --time=00:05:00 --cpus-per-task=1 --mem=1G \
            --nodes=1 -w "node0${NODE}" \
-           -o "${PROJ_DIR}/slurm-%A_%a.out" -e "${PROJ_DIR}/slurm-%A_%a.err" \
-           "${PROJ_DIR}/run_probe.sh"
+           -o "${SCRIPT_DIR}/slurm-%A_%a.out" -e "${SCRIPT_DIR}/slurm-%A_%a.err" \
+           "${SCRIPT_DIR}/run_probe.sh"
     sleep 1
 done
 

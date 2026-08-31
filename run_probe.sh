@@ -7,7 +7,7 @@
 #SBATCH -o slurm-%A_%a.out
 #SBATCH -e slurm-%A_%a.err
 
-PROJ_DIR="/cfs/earth/scratch/mrzi/develop/tkf_eval/cleanup_tests/standalone_epilog_test"
+SCRIPT_DIR="${SLURM_SUBMIT_DIR}"
 
 echo "=== Standalone epilog probe ==="
 echo "Job ID: ${SLURM_JOB_ID}"
@@ -30,4 +30,4 @@ echo "SCRATCH_BASE=${SCRATCH_BASE}"
 echo "NXF_SCRATCH=${NXF_SCRATCH}"
 echo "PWD after cd=$(pwd)"
 
-python3 "${PROJ_DIR}/epiltrap_standalone.py"
+python3 "${SCRIPT_DIR}/epiltrap_standalone.py"

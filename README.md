@@ -11,7 +11,11 @@ This deletes a running task's scratch directory out from under it.
 ## How to Run
 
 ```bash
+# no reservation
 ./submit_probe.sh 13 100
+
+# with a reservation (e.g. haep_50 on node020)
+./submit_probe.sh 20 100 haep_50
 ```
 
 ## What to Look For

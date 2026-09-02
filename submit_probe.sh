@@ -12,7 +12,7 @@ echo "Spacing: 1s between submissions (matching Nextflow behavior)"
 for i in $(seq 1 "${COUNT}"); do
     echo "  [${i}/${COUNT}] submitting..."
     sbatch --partition=earth-3 --time=00:05:00 --cpus-per-task=1 --mem=1G \
-           --nodes=1 -w "node0${NODE}" \
+           --nodes=1 -w "node0${NODE}" --reservation=haep_50 \
            -o "${SCRIPT_DIR}/slurm-%A_%a.out" -e "${SCRIPT_DIR}/slurm-%A_%a.err" \
            "${SCRIPT_DIR}/run_probe.sh"
     sleep 1

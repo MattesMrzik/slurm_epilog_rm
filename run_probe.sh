@@ -4,6 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G
 #SBATCH --nodes=1
+#SBATCH --reservation=haep_50
 #SBATCH -o slurm-%A_%a.out
 #SBATCH -e slurm-%A_%a.err
 

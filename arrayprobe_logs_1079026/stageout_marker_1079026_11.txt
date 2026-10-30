@@ -1,0 +1,1 @@
+created=2026-10-30T18:19:51.409300 job=1079038 array=1079026 task=11 scratch=/data/scratch/1079038/nxf.9c2ozt75

@@ -1,0 +1,16 @@
+[18:18:58.222] TASK_START job=1079021 array=1079012 task=8 host=node055
+[18:18:58.224] PARENT=/data/scratch/1079021 SCRATCH=/data/scratch/1079021/nxf.vuyeicq4 TMPDIR=/data/scratch/1079021 HOLD_S=5.0
+[18:18:58.226] SUBMIT_DIR=/cfs/earth/scratch/mrzi/develop/nextflow_output/epilog_probe/slurm_epilog_rm
+[18:18:58.228] STATE_AFTER_SETUP {'scratch': True, 'parent': True, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:18:58.265] MARKER_CREATED path=/data/scratch/1079021/nxf.vuyeicq4/PROBE_MARKER exists=True
+[18:18:58.267] SENTINEL_CREATED path=/data/scratch/1079021/PROBE_PARENT_SENTINEL exists=True
+[18:18:58.269] INPUT_FILES {'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 8}
+[18:18:58.271] HEARTBEAT elapsed=0.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 8}
+[18:18:59.274] HEARTBEAT elapsed=1.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 8}
+[18:19:00.275] HEARTBEAT elapsed=2.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 8}
+[18:19:00.841] SAW_EPILOG pids=[370515, 370522]
+[18:19:00.895] EPILOG_RM own=False pid=370541 comm=rm argv=rm -Rf /data/scratch/1079022
+[18:19:03.354] LOOP_END elapsed=5.083s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 8}
+[18:19:03.366] STAGE_OUT ok=1
+[18:19:03.368] VERDICT SURVIVED marker_exists=True scratch_exists=True parent_exists=True
+[18:19:03.371] TASK_END job=1079021 task=8 exit=0

@@ -1,0 +1,45 @@
+[18:19:51.246] TASK_START job=1079027 array=1079026 task=0 host=node055
+[18:19:51.249] PARENT=/data/scratch/1079027 SCRATCH=/data/scratch/1079027/nxf.am58d5zm TMPDIR=/data/scratch/1079027 HOLD_S=25.0
+[18:19:51.251] SUBMIT_DIR=/cfs/earth/scratch/mrzi/develop/nextflow_output/epilog_probe/slurm_epilog_rm
+[18:19:51.253] STATE_AFTER_SETUP {'scratch': True, 'parent': True, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:19:51.292] MARKER_CREATED path=/data/scratch/1079027/nxf.am58d5zm/PROBE_MARKER exists=True
+[18:19:51.294] SENTINEL_CREATED path=/data/scratch/1079027/PROBE_PARENT_SENTINEL exists=True
+[18:19:51.296] INPUT_FILES {'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 64}
+[18:19:51.297] HEARTBEAT elapsed=0.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 64}
+[18:19:52.298] HEARTBEAT elapsed=1.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 64}
+[18:19:53.319] HEARTBEAT elapsed=2.0s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 64}
+[18:19:53.912] SAW_EPILOG pids=[372522]
+[18:19:53.970] EPILOG_RM own=False pid=372547 comm=rm argv=rm -Rf /data/scratch/1079036
+[18:19:56.426] HEARTBEAT elapsed=5.1s state={'scratch': True, 'parent': True, 'marker': True, 'sentinel': True, 'blobs': 64}
+[18:19:56.500] SAW_EPILOG pids=[372587, 372593, 372602, 372608, 372615, 372616, 372625, 372627, 372631, 372633, 372648, 372649, 372653, 372656, 372662, 372670, 372673]
+[18:19:56.540] EPILOG_RM own=True pid=372822 comm=rm argv=rm -Rf /data/scratch/1079026 /data/scratch/1079027 /data/scratch/1079028 /data/scratch/1079029 /data/scratch/1079030 /data/scratch/1079031 /data/scratch/1079032 /data/scratch/1079033 /data/scratch/1079034 /data/scratch/1079035 /data/scratch/1079037 /data/scratch/1079038 /data/scratch/1079039
+[18:19:56.543]   ANCESTRY pid=372822 comm=rm ppid=372615 argv=rm -Rf /data/scratch/1079026 /data/scratch/1079027 /data/scratch/1079028 /data/scratch/1079029 /data/scratch/1079030 /data/scratch/1079031 /data/scratch/1079032 /data/scratch/1079033 /data/scratch/1079034 /data/scratch/1079035 /data/scratch/1079037 /data/scratch/1079038 /data/scratch/1079039
+[18:19:56.545]   ANCESTRY pid=372615 comm=10-epilog.sh ppid=372587 argv=/bin/bash /cm/local/apps/slurm/var/epilogs/10-epilog.sh
+[18:19:56.547]   ANCESTRY pid=372587 comm=epilog ppid=3665 argv=/bin/sh /cm/local/apps/cmd/scripts/epilog
+[18:19:56.585]   OWN_STATE_AT_RM JobId=1079027 ArrayJobId=1079026 ArrayTaskId=0 JobName=arrwipe | JobState=RUNNING Reason=None Dependency=(null) | ReqNodeList=node055 ExcNodeList=(null) | NodeList=node055
+[18:19:56.587]   OWN_STATE_FS {'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:19:59.013] WIPE_DETECTED elapsed=7.716s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:19:59.070]   OWN_STATE_AT_WIPE JobId=1079027 ArrayJobId=1079026 ArrayTaskId=0 JobName=arrwipe | JobState=RUNNING Reason=None Dependency=(null) | ReqNodeList=node055 ExcNodeList=(null) | NodeList=node055
+[18:19:59.073] HEARTBEAT elapsed=7.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:00.088] HEARTBEAT elapsed=8.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:01.111] HEARTBEAT elapsed=9.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:02.117] HEARTBEAT elapsed=10.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:03.122] HEARTBEAT elapsed=11.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:04.127] HEARTBEAT elapsed=12.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:05.130] HEARTBEAT elapsed=13.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:06.132] HEARTBEAT elapsed=14.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:07.142] HEARTBEAT elapsed=15.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:08.146] HEARTBEAT elapsed=16.8s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:09.149] HEARTBEAT elapsed=17.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:10.152] HEARTBEAT elapsed=18.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:11.156] HEARTBEAT elapsed=19.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:12.157] HEARTBEAT elapsed=20.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:13.157] HEARTBEAT elapsed=21.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:14.160] HEARTBEAT elapsed=22.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:15.163] HEARTBEAT elapsed=23.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:16.187] HEARTBEAT elapsed=24.9s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:16.315] LOOP_END elapsed=25.018s state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:16.322] STAGE_OUT ok=0 error=FileNotFoundError(2, 'No such file or directory')
+[18:20:16.325] VERDICT WIPED_WHILE_RUNNING elapsed=7.716s at_state={'scratch': False, 'parent': False, 'marker': False, 'sentinel': False, 'blobs': 0}
+[18:20:16.327] VERDICT marker_exists_final=False scratch_exists_final=False parent_exists_final=False
+[18:20:16.330] TASK_END job=1079027 task=0 exit=42

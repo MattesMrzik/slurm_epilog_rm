@@ -21,6 +21,8 @@ MY_ID = os.environ.get("SLURM_JOB_ID", "")
 ARRAY_ID = os.environ.get("SLURM_ARRAY_JOB_ID", "")
 TASK_ID = os.environ.get("SLURM_ARRAY_TASK_ID", "")
 HOLD_S = float(os.environ.get("HOLD_S", "5"))
+FILLER_FILES = int(os.environ.get("FILLER_FILES", "256" if HOLD_S >= 15 else "8"))
+FILLER_KB = int(os.environ.get("FILLER_KB", "256" if HOLD_S >= 15 else "64"))
 LOG_DIR = os.environ["PROBE_LOG_DIR"]
 SCTL = shutil.which("scontrol") or "/cm/shared/apps/slurm/current/bin/scontrol"
 
@@ -30,7 +32,7 @@ LOG_PATH = os.path.join(LOG_DIR, "arrayprobe_%s_%s.log" % (ARRAY_ID, TASK_ID))
 LOG_FH = open(LOG_PATH, "a", buffering=1)
 MARKER = os.path.join(PARENT, "PROBE_MARKER")
 
-DELETE_COMMS = ("rm", "rmdir", "unlink", "mv", "find", "shred", "python", "python3")
+DELETE_TOKENS = ("rm ", "rmdir", "unlink", "rmtree", "find ", "truncate", "shred")
 
 
 def now():
@@ -73,56 +75,28 @@ def stat(pid):
     return fields[0], int(fields[1])
 
 
-def children(pid):
-    kids = set()
-    try:
-        for tid in os.listdir("/proc/%d/task" % pid):
-            data = read("/proc/%d/task/%s/children" % (pid, tid))
-            kids.update(int(x) for x in data.split())
-    except Exception:
-        pass
-    return sorted(kids)
-
-
-def walk(root, depth=8):
-    info = {}
-    frontier = [root]
-    seen = {root}
-    for _ in range(depth):
-        nxt = []
-        for pid in frontier:
-            state, ppid = stat(pid)
-            info.setdefault(pid, (comm(pid), ppid, cmdline(pid)))
-            for child in children(pid):
-                if child in seen:
-                    continue
-                seen.add(child)
-                state, ppid = stat(child)
-                info[child] = (comm(child), ppid, cmdline(child))
-                nxt.append(child)
-        if not nxt:
-            break
-        frontier = nxt
-    return info
-
-
-def ancestry(info, pid, depth=10):
+def ancestry(pid, depth=10):
     out = []
     seen = set()
     for _ in range(depth):
-        if not pid or pid in seen or pid not in info:
+        if not pid or pid in seen:
             break
         seen.add(pid)
-        c, ppid, argv = info[pid]
-        out.append((pid, c, ppid, argv))
+        _, ppid = stat(pid)
+        out.append((pid, comm(pid), ppid, cmdline(pid)))
         pid = ppid
     return out
 
 
 def state():
+    try:
+        files = sum(1 for name in os.listdir(PARENT) if name.startswith("filler_"))
+    except Exception:
+        files = 0
     return {
         "dir": os.path.isdir(PARENT),
         "marker": os.path.isfile(MARKER),
+        "files": files,
     }
 
 
@@ -159,47 +133,47 @@ def create_inputs():
     with open(MARKER, "w") as fh:
         fh.write("job=%s array=%s task=%s scratch=%s\n" % (MY_ID, ARRAY_ID, TASK_ID, PARENT))
 
+    # Keep the epilog's rm alive long enough to catch its PID/argv.  Many files
+    # are better than one large file because unlink cost is per file.
+    payload = b"x" * (FILLER_KB * 1024)
+    for i in range(FILLER_FILES):
+        with open(os.path.join(PARENT, "filler_%04d" % i), "wb") as fh:
+            fh.write(payload)
+    log("FILLER files=%d size_kb=%d total_mb=%.1f"
+        % (FILLER_FILES, FILLER_KB, FILLER_FILES * FILLER_KB / 1024.0))
 
-def catch_epilog(seen_rm, seen_epilog):
-    epilogs = []
+
+def scan_processes(seen_rm, seen_epilog):
     for entry in os.listdir("/proc"):
         if not entry.isdigit():
             continue
         pid = int(entry)
+        if pid == os.getpid():
+            continue
         c = comm(pid)
-        cl = cmdline(pid)
-        if c in ("epilog", "10-epilog.sh") or "10-epilog.sh" in cl:
-            epilogs.append(pid)
+        argv = cmdline(pid)
+
+        if c in ("epilog", "10-epilog.sh") or "10-epilog.sh" in argv:
             if pid not in seen_epilog:
                 seen_epilog.add(pid)
-                log("SAW_EPILOG pid=%d comm=%s argv=%s" % (pid, c, cl))
+                log("SAW_EPILOG pid=%d comm=%s argv=%s" % (pid, c, argv))
 
-    if not epilogs:
-        return
+        if "/data/scratch" not in argv:
+            continue
+        if not any(token in argv for token in DELETE_TOKENS):
+            continue
 
-    deadline = time.time() + 2.5
-    while time.time() < deadline:
-        for epilog in epilogs:
-            if not os.path.isdir("/proc/%d" % epilog):
-                continue
-            info = walk(epilog)
-            for pid, (c, ppid, argv) in info.items():
-                if "/data/scratch" not in argv:
-                    continue
-                if c not in DELETE_COMMS and "10-epilog.sh" not in argv:
-                    continue
-                key = (pid, argv)
-                if key in seen_rm:
-                    continue
-                seen_rm.add(key)
-                own = own_scratch(argv)
-                log("EPILOG_RM own=%s pid=%d comm=%s argv=%s" % (own, pid, c, argv))
-                if own:
-                    for row in ancestry(info, pid):
-                        log("  ANCESTRY pid=%d comm=%s ppid=%d argv=%s" % row)
-                    log("  OWN_STATE_AT_RM %s" % scontrol_state())
-                    log("  OWN_STATE_FS %s" % state())
-        time.sleep(0.001)
+        key = (pid, argv)
+        if key in seen_rm:
+            continue
+        seen_rm.add(key)
+        own = own_scratch(argv)
+        log("EPILOG_RM own=%s pid=%d comm=%s argv=%s" % (own, pid, c, argv))
+        if own:
+            for row in ancestry(pid):
+                log("  ANCESTRY pid=%d comm=%s ppid=%d argv=%s" % row)
+            log("  OWN_STATE_AT_RM %s" % scontrol_state())
+            log("  OWN_STATE_FS %s" % state())
 
 
 def main():
@@ -220,8 +194,8 @@ def main():
             wiped = (time.time() - start, st)
             log("WIPE_DETECTED elapsed=%.3fs state=%s" % wiped)
             log("  OWN_STATE_AT_WIPE %s" % scontrol_state())
-        catch_epilog(seen_rm, seen_epilog)
-        time.sleep(0.01)
+        scan_processes(seen_rm, seen_epilog)
+        time.sleep(0.005)
 
     final = state()
     log("LOOP_END elapsed=%.3fs state=%s" % (time.time() - start, final))

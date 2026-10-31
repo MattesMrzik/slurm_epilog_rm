@@ -15,7 +15,9 @@ The script submits one array job on `node055`:
 - tasks 0 and 7 run for 25 s,
 - the other 12 tasks run for 3-5 s,
 - each task uses its own `$TMPDIR` directly; the epilog removes that whole
-  per-task dir, so no nested `nxf.*` is needed.
+  per-task dir, so no nested `nxf.*` is needed,
+- long tasks create `256 × 256 KiB` filler files. This keeps the epilog's `rm`
+  alive long enough to capture its PID and full argv.
 
 When the short tasks finish together, the epilog runs one `rm -Rf` covering all
 `/data/scratch/<numeric job id>` dirs on the node, including the two still-running
@@ -23,20 +25,16 @@ tasks. They detect the wipe while `JobState=RUNNING` and exit with code 42.
 
 ## Evidence
 
-See `ARRAY_PROBE_EVIDENCE.md`. The key result is:
+See `ARRAY_PROBE_EVIDENCE.md`. A confirmed run (array `1079355`) captured the
+deleting process:
 
 ```text
-WIPE_DETECTED ... state={'dir': False, 'marker': False}
+EPILOG_RM own=True pid=464713 comm=rm
+  argv=rm -Rf /data/scratch/1079355 /data/scratch/1079356 ... /data/scratch/1079367
+
+WIPE_DETECTED elapsed=4.092s state={'dir': False, 'marker': False, 'files': 0}
 JobState=RUNNING
 VERDICT WIPED_WHILE_RUNNING
-```
-
-When the epilog `rm` is caught in time, it also logs the PID and argv:
-
-```text
-EPILOG_RM own=True pid=... comm=rm
-  argv=rm -Rf /data/scratch/<id1> /data/scratch/<id2> ...
-  ANCESTRY rm <- 10-epilog.sh <- /cm/local/apps/cmd/scripts/epilog
 ```
 
 ## Warning

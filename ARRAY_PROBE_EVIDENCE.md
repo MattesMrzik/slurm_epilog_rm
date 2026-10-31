@@ -3,23 +3,26 @@
 Node: `node055` (`earth-1`). Array job: `1079026` (run 2; run 1 reproduced
 identically).
 
-## Simplified probe re-check
+## PID capture with filler (array `1079355`)
 
-After removing the nested `nxf.*` layout, array `1079320` on `node055`
-reproduced the wipe again:
+Long tasks create `256 × 256 KiB` filler files. This keeps the epilog's `rm`
+alive long enough to capture its PID and argv:
 
 ```text
-task 0: WIPE_DETECTED elapsed=8.074s state={'dir': False, 'marker': False}
-        JobState=RUNNING, exit 42
-task 7: WIPE_DETECTED elapsed=8.126s state={'dir': False, 'marker': False}
-        JobState=RUNNING, exit 42
+12:49:27.151 EPILOG_RM own=True pid=464713 comm=rm
+  argv=rm -Rf /data/scratch/1079355 /data/scratch/1079356 /data/scratch/1079357
+       /data/scratch/1079358 /data/scratch/1079360 /data/scratch/1079361
+       /data/scratch/1079363 /data/scratch/1079364 /data/scratch/1079366
+       /data/scratch/1079367
+
+12:49:27.147 WIPE_DETECTED elapsed=4.092s state={'dir': False, 'marker': False, 'files': 0}
+12:49:27.189   OWN_STATE_AT_WIPE JobId=1079356 ... JobState=RUNNING ...
 ```
 
-All short tasks completed normally. The nested `nxf.*` subdirectory is not
-required; the epilog removes the whole `/data/scratch/<jobid>` directory.
-The epilog `rm` argv was not captured in this simplified run because removing
-the filler files made the `rm` too fast; the wipe and `RUNNING` state are the
-core evidence.
+Tasks 0, 2, 5, 7, and 8 were still running when wiped; they exited 42.
+
+The nested `nxf.*` subdirectory is not required; the epilog removes the whole
+`/data/scratch/<jobid>` directory.
 
 ## Design
 

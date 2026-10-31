@@ -1,94 +1,46 @@
-# Standalone SLURM Epilog Wipe Test
+# SLURM epilog wipe test
 
-Reproduces the SLURM epilog wipe-while-running bug **without Nextflow**.
+Reproduces the site epilog deleting scratch dirs of jobs that are still
+**RUNNING**.
 
-## The Bug
-
-SLURM's `10-epilog.sh` runs `rm -Rf /data/scratch/<jobid>` when a job completes,
-but passes **multiple job IDs** — including jobs that are **still running**.
-This deletes a running task's scratch directory out from under it.
-
-## Array-job reproduction (confirmed on node055)
-
-The exact Nextflow failure mode is reproduced by a single SLURM array job where
-most tasks finish together while two tasks keep running.
+## Reproduce
 
 ```bash
 sbatch run_array_probe.sh
 ```
 
-See `ARRAY_PROBE_EVIDENCE.md` for the full evidence. Both runs reproduced it:
-the epilog of the gang of short tasks ran one `rm -Rf` listing **all**
-`/data/scratch/<numeric job id>` dirs on the node, including the two
-still-`RUNNING` long tasks, whose stage-out then failed with exit 42.
+The script submits one array job on `node055`:
 
-Trigger: a *gang* of near-simultaneous completions. A lone finishing task only
-removes its own scratch dir.
+- 14 tasks, all started together,
+- tasks 0 and 7 run for 25 s,
+- the other 12 tasks run for 3-5 s,
+- each task uses `$TMPDIR/nxf.XXXXXXXXXX`, the same layout Nextflow uses with
+  `scratch = true`.
 
-**Warning:** this also wipes scratch dirs of other running jobs on the target
-node. Only run it on a node you may disrupt, or during a maintenance window.
+When the short tasks finish together, the epilog runs one `rm -Rf` covering all
+`/data/scratch/<numeric job id>` dirs on the node, including the two still-running
+tasks. They detect the wipe while `JobState=RUNNING` and exit with code 42.
 
-## Wildcard variant (node055 / earth-1)
+## Evidence
 
-On `node055` / `earth-1` the epilog was observed running:
-
-```bash
-rm -Rf /data/scratch/*
-```
-
-That deletes the scratch dirs of **all** jobs on the node, including jobs that
-are still `RUNNING`. It does not mention a job ID, so a probe must treat a
-wildcard `/data/scratch/*` as touching its own scratch.
-
-The two-job reproducer:
-
-```bash
-WILDCARD_PROBE_YES=1 ./submit_wildcard_probe.sh 55 earth-1 60
-```
-
-It submits:
-
-1. a long-running probe on `node055`,
-2. a short trigger job on the same node.
-
-When the trigger job completes, its epilog runs the wildcard `rm`. The long
-probe should log:
+See `ARRAY_PROBE_EVIDENCE.md`. The key lines are:
 
 ```text
-EPILOG_RM own=True ... argv=rm -Rf /data/scratch/*
-SCRATCH_WIPED = True
-PARENT_WIPED = True
-CONCRETE_EVIDENCE: caught epilog rm + scratch/marker wiped = wipe-while-running confirmed
+EPILOG_RM own=True pid=372822 comm=rm
+  argv=rm -Rf /data/scratch/1079026 /data/scratch/1079027 ... /data/scratch/1079039
+  ANCESTRY rm <- 10-epilog.sh <- /cm/local/apps/cmd/scripts/epilog
+
+JobState=RUNNING
+OWN_STATE_FS {'scratch': False, 'parent': False, 'marker': False, 'sentinel': False}
 ```
 
-**Warning:** this wipes `/data/scratch` on the target node, including other
-users' running jobs. Only run it on a node you may disrupt, or during a
-maintenance window.
+## Warning
 
-## How to Run
+This wipes `/data/scratch` on the target node, including other users' running
+jobs. Only run it on a node you may disrupt, or during a maintenance window.
 
-```bash
-# no reservation
-./submit_probe.sh 13 100
+## Files
 
-# with a reservation (e.g. haep_50 on node020)
-./submit_probe.sh 20 100 haep_50
-```
-
-## What to Look For
-
-1. Check `sacct` for failed jobs (exit code 1 = caught the wipe):
-   ```bash
-   sacct --format=JobID,State,ExitCode,Elapsed,NodeList -u $USER -S $(date -d '10 minutes ago' +%Y-%m-%d:%H:%M)
-   ```
-
-2. Look at `.out` files containing `CONCRETE_EVIDENCE`:
-   ```bash
-   grep -l CONCRETE_EVIDENCE slurm-*.out
-   ```
-
-3. In those files you'll see:
-   - `FOUND_OWN_CWD = (/data/scratch/<jobid>/nxf.XXXXX) in child of epilog: rm -Rf /data/scratch/<id1> /data/scratch/<id2> /data/scratch/<id3>`
-   - `MARKER_CHECK_FINAL exists=False`
-   - `CONCRETE_EVIDENCE: caught epilog rm + marker wiped = wipe-while-running confirmed`
-   - `scontrol` output showing the job was `RUNNING` at the moment of the wipe
+- `run_array_probe.sh` — sbatch wrapper
+- `array_epilog_probe.py` — per-task probe
+- `ARRAY_PROBE_EVIDENCE.md` — saved evidence

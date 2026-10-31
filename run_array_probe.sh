@@ -20,7 +20,7 @@
 # TMPDIR is set by the site task prolog to /data/scratch/<numeric SLURM_JOB_ID>,
 # i.e. a per-task node-local scratch dir.  Each array element gets its own
 # numeric SLURM_JOB_ID, so each task has its own TMPDIR.  The epilog removes
-# this whole per-task dir; no nested subdirectory is needed.
+# this whole per-task dir.
 
 SCRIPT_DIR="${SLURM_SUBMIT_DIR}"
 LOG_DIR="${SCRIPT_DIR}/arrayprobe_logs_${SLURM_ARRAY_JOB_ID}"

@@ -21,8 +21,7 @@ alive long enough to capture its PID and argv:
 
 Tasks 0, 2, 5, 7, and 8 were still running when wiped; they exited 42.
 
-No nested subdirectory is required; the epilog removes the whole
-`/data/scratch/<jobid>` directory.
+The epilog removes the whole `/data/scratch/<jobid>` directory.
 
 ## Design
 

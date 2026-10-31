@@ -23,15 +23,20 @@ tasks. They detect the wipe while `JobState=RUNNING` and exit with code 42.
 
 ## Evidence
 
-See `ARRAY_PROBE_EVIDENCE.md`. The key lines are:
+See `ARRAY_PROBE_EVIDENCE.md`. The key result is:
 
 ```text
-EPILOG_RM own=True pid=372822 comm=rm
-  argv=rm -Rf /data/scratch/1079026 /data/scratch/1079027 ... /data/scratch/1079039
-  ANCESTRY rm <- 10-epilog.sh <- /cm/local/apps/cmd/scripts/epilog
-
+WIPE_DETECTED ... state={'dir': False, 'marker': False}
 JobState=RUNNING
-OWN_STATE_FS {'scratch': False, 'parent': False, 'marker': False, 'sentinel': False}
+VERDICT WIPED_WHILE_RUNNING
+```
+
+When the epilog `rm` is caught in time, it also logs the PID and argv:
+
+```text
+EPILOG_RM own=True pid=... comm=rm
+  argv=rm -Rf /data/scratch/<id1> /data/scratch/<id2> ...
+  ANCESTRY rm <- 10-epilog.sh <- /cm/local/apps/cmd/scripts/epilog
 ```
 
 ## Warning

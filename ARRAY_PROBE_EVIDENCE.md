@@ -3,6 +3,24 @@
 Node: `node055` (`earth-1`). Array job: `1079026` (run 2; run 1 reproduced
 identically).
 
+## Simplified probe re-check
+
+After removing the nested `nxf.*` layout, array `1079320` on `node055`
+reproduced the wipe again:
+
+```text
+task 0: WIPE_DETECTED elapsed=8.074s state={'dir': False, 'marker': False}
+        JobState=RUNNING, exit 42
+task 7: WIPE_DETECTED elapsed=8.126s state={'dir': False, 'marker': False}
+        JobState=RUNNING, exit 42
+```
+
+All short tasks completed normally. The nested `nxf.*` subdirectory is not
+required; the epilog removes the whole `/data/scratch/<jobid>` directory.
+The epilog `rm` argv was not captured in this simplified run because removing
+the filler files made the `rm` too fast; the wipe and `RUNNING` state are the
+core evidence.
+
 ## Design
 
 One real SLURM array job with 14 tasks, all on the same node:

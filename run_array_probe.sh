@@ -17,6 +17,11 @@
 # $TMPDIR/nxf.XXXXXXXXXX (the layout Nextflow uses with scratch=true) and
 # checks, while it is still alive, whether its own scratch is deleted when the
 # short siblings finish and their epilogs run.
+#
+# TMPDIR is set by the site task prolog to /data/scratch/<numeric SLURM_JOB_ID>,
+# i.e. a per-task node-local scratch dir.  Each array element gets its own
+# numeric SLURM_JOB_ID, so each task has its own TMPDIR.  The probe creates
+# $TMPDIR/nxf.XXXXXXXXXX, exactly like Nextflow's nxf_mktemp with scratch=true.
 
 SCRIPT_DIR="${SLURM_SUBMIT_DIR}"
 LOG_DIR="${SCRIPT_DIR}/arrayprobe_logs_${SLURM_ARRAY_JOB_ID}"

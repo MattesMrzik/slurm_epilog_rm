@@ -15,7 +15,7 @@ The script submits one array job on `node055`:
 - tasks 0 and 7 run for 25 s,
 - the other 12 tasks run for 3-5 s,
 - each task uses its own `$TMPDIR` directly; the epilog removes that whole
-  per-task dir, so no nested `nxf.*` is needed,
+  per-task dir, so no nested subdirectory is needed,
 - long tasks create `256 × 256 KiB` filler files. This keeps the epilog's `rm`
   alive long enough to capture its PID and full argv.
 

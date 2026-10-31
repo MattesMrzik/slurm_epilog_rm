@@ -5,9 +5,9 @@ Runs inside one array task. It uses the per-task scratch dir directly:
 
     TMPDIR=/data/scratch/<numeric job id>
 
-The epilog deletes that whole directory, so a nested nxf.* subdirectory is not
-needed. The probe polls whether its marker/dir disappear while it is still
-running and records the epilog's `rm -Rf /data/scratch/...` command from /proc.
+The epilog deletes that whole directory, so no nested subdirectory is needed.
+The probe polls whether its marker/dir disappear while it is still running and
+records the epilog's `rm -Rf /data/scratch/...` command from /proc.
 """
 
 import datetime

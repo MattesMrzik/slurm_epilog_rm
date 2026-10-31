@@ -21,7 +21,7 @@ alive long enough to capture its PID and argv:
 
 Tasks 0, 2, 5, 7, and 8 were still running when wiped; they exited 42.
 
-The nested `nxf.*` subdirectory is not required; the epilog removes the whole
+No nested subdirectory is required; the epilog removes the whole
 `/data/scratch/<jobid>` directory.
 
 ## Design
@@ -31,8 +31,7 @@ One real SLURM array job with 14 tasks, all on the same node:
 - tasks 0 and 7 hold for 25 s,
 - the other 12 tasks hold for 3-5 s,
 - every task uses its own `$TMPDIR` directly and creates a marker there
-  (the original confirmed run used a nested `nxf.*` dir; the epilog removes the
-  whole per-task parent either way),
+  (the epilog removes the whole per-task parent either way),
 - every task polls whether its scratch/marker disappears and watches `/proc`
   for `epilog -> 10-epilog.sh -> rm -Rf /data/scratch/...`.
 

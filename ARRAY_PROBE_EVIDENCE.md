@@ -9,8 +9,9 @@ One real SLURM array job with 14 tasks, all on the same node:
 
 - tasks 0 and 7 hold for 25 s,
 - the other 12 tasks hold for 3-5 s,
-- every task creates `$TMPDIR/nxf.XXXXXXXXXX` (the Nextflow `scratch = true`
-  layout), a marker and a parent sentinel,
+- every task uses its own `$TMPDIR` directly and creates a marker there
+  (the original confirmed run used a nested `nxf.*` dir; the epilog removes the
+  whole per-task parent either way),
 - every task polls whether its scratch/marker disappears and watches `/proc`
   for `epilog -> 10-epilog.sh -> rm -Rf /data/scratch/...`.
 

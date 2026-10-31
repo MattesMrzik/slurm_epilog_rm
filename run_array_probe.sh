@@ -13,15 +13,14 @@
 # Array-job probe for the SLURM epilog wipe-while-running bug.
 #
 # 14 array tasks all start together on one node.  Two of them (0 and 7) run for
-# 25 s; the other twelve finish after 3-5 s.  Every task runs in its own
-# $TMPDIR/nxf.XXXXXXXXXX (the layout Nextflow uses with scratch=true) and
-# checks, while it is still alive, whether its own scratch is deleted when the
-# short siblings finish and their epilogs run.
+# 25 s; the other twelve finish after 3-5 s.  Every task runs directly in its own
+# $TMPDIR and checks, while it is still alive, whether that dir is deleted when
+# the short siblings finish and their epilogs run.
 #
 # TMPDIR is set by the site task prolog to /data/scratch/<numeric SLURM_JOB_ID>,
 # i.e. a per-task node-local scratch dir.  Each array element gets its own
-# numeric SLURM_JOB_ID, so each task has its own TMPDIR.  The probe creates
-# $TMPDIR/nxf.XXXXXXXXXX, exactly like Nextflow's nxf_mktemp with scratch=true.
+# numeric SLURM_JOB_ID, so each task has its own TMPDIR.  The epilog removes
+# this whole per-task dir; no nested nxf.* subdirectory is needed.
 
 SCRIPT_DIR="${SLURM_SUBMIT_DIR}"
 LOG_DIR="${SCRIPT_DIR}/arrayprobe_logs_${SLURM_ARRAY_JOB_ID}"

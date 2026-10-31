@@ -14,8 +14,8 @@ The script submits one array job on `node055`:
 - 14 tasks, all started together,
 - tasks 0 and 7 run for 25 s,
 - the other 12 tasks run for 3-5 s,
-- each task uses `$TMPDIR/nxf.XXXXXXXXXX`, the same layout Nextflow uses with
-  `scratch = true`.
+- each task uses its own `$TMPDIR` directly; the epilog removes that whole
+  per-task dir, so no nested `nxf.*` is needed.
 
 When the short tasks finish together, the epilog runs one `rm -Rf` covering all
 `/data/scratch/<numeric job id>` dirs on the node, including the two still-running

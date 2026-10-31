@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Reproduce the SLURM epilog wiping a running task's scratch.
 
-Runs inside one array task. It creates the same scratch layout as Nextflow with
-`scratch = true`:
+Runs inside one array task. It uses the per-task scratch dir directly:
 
     TMPDIR=/data/scratch/<numeric job id>
-    cd $TMPDIR/nxf.XXXXXXXXXX
 
-Then it polls whether its marker/dir disappear while it is still running and
-records the epilog's `rm -Rf /data/scratch/...` command from /proc.
+The epilog deletes that whole directory, so a nested nxf.* subdirectory is not
+needed. The probe polls whether its marker/dir disappear while it is still
+running and records the epilog's `rm -Rf /data/scratch/...` command from /proc.
 """
 
 import datetime
@@ -16,7 +15,6 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 
 MY_ID = os.environ.get("SLURM_JOB_ID", "")
@@ -27,13 +25,10 @@ LOG_DIR = os.environ["PROBE_LOG_DIR"]
 SCTL = shutil.which("scontrol") or "/cm/shared/apps/slurm/current/bin/scontrol"
 
 PARENT = os.environ.get("TMPDIR") or ("/data/scratch/" + MY_ID)
-SCRATCH = tempfile.mkdtemp(prefix="nxf.", dir=PARENT)
-os.chdir(SCRATCH)
 
 LOG_PATH = os.path.join(LOG_DIR, "arrayprobe_%s_%s.log" % (ARRAY_ID, TASK_ID))
 LOG_FH = open(LOG_PATH, "a", buffering=1)
-MARKER = os.path.join(SCRATCH, "PROBE_MARKER")
-SENTINEL = os.path.join(PARENT, "PROBE_PARENT_SENTINEL")
+MARKER = os.path.join(PARENT, "PROBE_MARKER")
 
 DELETE_COMMS = ("rm", "rmdir", "unlink", "mv", "find", "shred", "python", "python3")
 
@@ -126,10 +121,8 @@ def ancestry(info, pid, depth=10):
 
 def state():
     return {
-        "scratch": os.path.isdir(SCRATCH),
-        "parent": os.path.isdir(PARENT),
+        "dir": os.path.isdir(PARENT),
         "marker": os.path.isfile(MARKER),
-        "sentinel": os.path.isfile(SENTINEL),
     }
 
 
@@ -164,9 +157,7 @@ def scontrol_state():
 
 def create_inputs():
     with open(MARKER, "w") as fh:
-        fh.write("job=%s array=%s task=%s scratch=%s\n" % (MY_ID, ARRAY_ID, TASK_ID, SCRATCH))
-    with open(SENTINEL, "w") as fh:
-        fh.write("job=%s task=%s pid=%d\n" % (MY_ID, TASK_ID, os.getpid()))
+        fh.write("job=%s array=%s task=%s scratch=%s\n" % (MY_ID, ARRAY_ID, TASK_ID, PARENT))
 
 
 def catch_epilog(seen_rm, seen_epilog):
@@ -213,7 +204,7 @@ def catch_epilog(seen_rm, seen_epilog):
 
 def main():
     log("TASK_START job=%s array=%s task=%s host=%s" % (MY_ID, ARRAY_ID, TASK_ID, os.uname().nodename))
-    log("PARENT=%s SCRATCH=%s TMPDIR=%s HOLD_S=%s" % (PARENT, SCRATCH, os.environ.get("TMPDIR"), HOLD_S))
+    log("PARENT=%s TMPDIR=%s HOLD_S=%s" % (PARENT, os.environ.get("TMPDIR"), HOLD_S))
 
     create_inputs()
     log("INPUT_FILES %s" % state())
@@ -225,7 +216,7 @@ def main():
 
     while time.time() - start < HOLD_S:
         st = state()
-        if wiped is None and (not st["scratch"] or not st["marker"] or not st["parent"] or not st["sentinel"]):
+        if wiped is None and (not st["dir"] or not st["marker"]):
             wiped = (time.time() - start, st)
             log("WIPE_DETECTED elapsed=%.3fs state=%s" % wiped)
             log("  OWN_STATE_AT_WIPE %s" % scontrol_state())
